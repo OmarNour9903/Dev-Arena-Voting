@@ -42,12 +42,6 @@
         width: 100%;
         border-radius: 10px;
         position: relative;
-        transition: all 0.3s ease;
-      }
-      .alert {
-        text-align: center;
-        margin-top: 20px;
-        display: none;
       }
       .btn-spinner {
         display: none;
@@ -73,14 +67,9 @@
       <p class="mb-5">اختار التيم اللي عجبك وصوّت له ❤️</p>
 
       <div class="row g-4" id="teamsContainer"></div>
-
-      <div id="alertBox" class="alert alert-success"></div>
     </div>
 
     <script>
-      // ===========================
-      //   إعداد التيمات
-      // ===========================
       const teams = [
         { name: "Team 1", logo: "./1000541647-01.jpeg.jpg" },
         { name: "Team 2", logo: "./1000541647-01.jpeg.jpg" },
@@ -91,9 +80,6 @@
 
       const container = document.getElementById("teamsContainer");
 
-      // ===========================
-      //   توليد الكروت
-      // ===========================
       teams.forEach((team) => {
         const card = document.createElement("div");
         card.className = "col-md-4 col-sm-6";
@@ -112,33 +98,24 @@
         container.appendChild(card);
       });
 
-      // ===========================
-      //   جلب IP المستخدم
-      // ===========================
       async function getIP() {
         const res = await fetch("https://api.ipify.org?format=json");
         const data = await res.json();
         return data.ip;
       }
 
-      // ===========================
-      //   دالة التصويت
-      // ===========================
       async function vote(team, btn) {
-        const alertBox = document.getElementById("alertBox");
         const btnText = btn.querySelector(".btn-text");
         const btnSpinner = btn.querySelector(".btn-spinner");
 
+        btn.disabled = true;
+        btnText.style.display = "none";
+        btnSpinner.style.display = "inline-block";
+
         try {
-          btn.disabled = true;
-          btnText.style.display = "none";
-          btnSpinner.style.display = "inline-block";
-          alertBox.style.display = "none";
-
           const ip = await getIP();
-
           const response = await fetch(
-            "https://script.google.com/macros/s/AKfycbzKgFWi2ThZlplfCX0nZ8tF9-qgbOns1QGcWBpO-A9zsWmJIqtXfaQoWHztJvUEapxvRQ/exec",
+            "https://script.google.com/macros/s/AKfycbyRa4jqrLxMZct0VMWjA367XOZ1qLsdwwA73DDRpI9LtlBqO7oIx4peyXWRN_9b7AzNSw/exec",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -146,40 +123,30 @@
             }
           );
 
+          if (!response.ok) throw new Error("Network error");
+
           const result = await response.json();
 
-          if (result.message.includes("صوتت للتيم دا قبل كده")) {
-            alertBox.innerText = result.message;
-            alertBox.className = "alert alert-warning";
-            btn.classList.remove("btn-primary");
-            btn.classList.add("btn-warning");
-            btn.innerHTML = "صوتت قبل كده ⚠️";
-            btn.disabled = true;
-          } else if (result.message.includes("تم تسجيل صوتك")) {
-            alertBox.innerText = result.message;
-            alertBox.className = "alert alert-success";
+          if (result.success) {
             btn.classList.remove("btn-primary");
             btn.classList.add("btn-success");
-            btn.innerHTML = "تم التصويت ✅";
-            btn.disabled = true;
+            btnText.textContent = "تم التصويت ✅";
           } else {
-            throw new Error("تصويت غير ناجح");
+            throw new Error(result.message || "حدث خطأ");
           }
-
-          alertBox.style.display = "block";
         } catch (error) {
-          alertBox.innerText = "⚠️ حصل خطأ أثناء إرسال التصويت!";
-          alertBox.className = "alert alert-danger";
-          alertBox.style.display = "block";
-
-          // رجّع الزرار لحالته الأصلية
           btn.disabled = false;
+          btnText.textContent = "Vote";
           btnText.style.display = "inline";
           btnSpinner.style.display = "none";
-        } finally {
-          btnSpinner.style.display = "none";
-          setTimeout(() => (alertBox.style.display = "none"), 3000);
+          alert("⚠️ حصل خطأ أثناء إرسال التصويت!");
+          console.error(error);
+          return;
         }
+
+        // بعد ما يوصل التصويت تمام
+        btnSpinner.style.display = "none";
+        btnText.style.display = "inline";
       }
     </script>
   </body>
