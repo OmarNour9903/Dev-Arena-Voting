@@ -116,43 +116,33 @@
         ===========================
       */
       async function vote(team) {
-        const alertBox = document.getElementById("alertBox");
-        try {
-          const ip = await getIP();
+  const alertBox = document.getElementById("alertBox");
+  try {
+    const ip = await getIP();
 
-          // استخدم proxy لتجاوز CORS
-          const proxyUrl = "https://corsproxy.io/?";
-          const scriptUrl =
-            "https://script.google.com/macros/s/AKfycbyQy_dAkGAXu1oOwgS8RQr_HlRTAD-HoBqZi5BjDez7l6sMCDAvt1C-Yp3VXHW6iVSVNQ/exec";
-
-          const response = await fetch(proxyUrl + scriptUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ team, ip }),
-          });
-
-          const resultText = await response.text();
-
-          if (resultText.includes("Already voted")) {
-            alertBox.innerText = "⚠️ لقد قمت بالتصويت لهذا التيم من قبل!";
-            alertBox.className = "alert alert-warning";
-          } else if (resultText.includes("Vote recorded")) {
-            alertBox.innerText = "✅ تم تسجيل صوتك بنجاح!";
-            alertBox.className = "alert alert-success";
-          } else {
-            alertBox.innerText = "⚠️ حصل خطأ أثناء إرسال التصويت!";
-            alertBox.className = "alert alert-danger";
-          }
-
-          alertBox.style.display = "block";
-          setTimeout(() => (alertBox.style.display = "none"), 3000);
-        } catch (error) {
-          alertBox.innerText = "⚠️ حصل خطأ أثناء إرسال التصويت!";
-          alertBox.className = "alert alert-danger";
-          alertBox.style.display = "block";
-          console.error(error);
-        }
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbyQy_dAkGAXu1oOwgS8RQr_HlRTAD-HoBqZi5BjDez7l6sMCDAvt1C-Yp3VXHW6iVSVNQ/exec",
+      {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ team, ip }),
       }
+    );
+
+    // مفيش response مباشر بسبب no-cors، فنكتفي بالعرض البسيط
+    alertBox.innerText = "✅ تم تسجيل صوتك!";
+    alertBox.className = "alert alert-success";
+    alertBox.style.display = "block";
+    setTimeout(() => (alertBox.style.display = "none"), 3000);
+  } catch (error) {
+    alertBox.innerText = "⚠️ حصل خطأ أثناء إرسال التصويت!";
+    alertBox.className = "alert alert-danger";
+    alertBox.style.display = "block";
+    console.error(error);
+  }
+}
+
     </script>
   </body>
 </html>
