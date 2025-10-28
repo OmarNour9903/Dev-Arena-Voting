@@ -82,11 +82,9 @@
     </div>
 
     <script>
-      /*
-        ===========================
-              إعداد التيمات
-        ===========================
-      */
+      const scriptURL =
+        "https://script.google.com/macros/s/AKfycbx-ddaGIz4W0gJBoYryzqNs7liKnblZ7vTtSR1a6tT_Hayy_pbAQvQO8_gr4bFbTuHUrA/exec";
+
       const teams = [
         { name: "Team 1", logo: "./1000541647-01.jpeg.jpg" },
         { name: "Team 2", logo: "./1000541647-01.jpeg.jpg" },
@@ -98,11 +96,6 @@
       const container = document.getElementById("teamsContainer");
       const alertBox = document.getElementById("alertBox");
 
-      /*
-        ===========================
-              توليد الكروت
-        ===========================
-      */
       teams.forEach((team) => {
         const card = document.createElement("div");
         card.className = "col-md-4 col-sm-6";
@@ -121,11 +114,6 @@
         container.appendChild(card);
       });
 
-      /*
-        ===========================
-          قفل الأزرار بعد التصويت
-        ===========================
-      */
       const votedTeams = JSON.parse(localStorage.getItem("votedTeams") || "[]");
       votedTeams.forEach((teamName) => {
         const btn = document.getElementById(`vote-${teamName}`);
@@ -135,51 +123,36 @@
         }
       });
 
-      /*
-        ===========================
-              دالة التصويت
-        ===========================
-      */
       async function vote(team) {
         const btn = document.getElementById(`vote-${team}`);
         const btnText = btn.querySelector(".btn-text");
         const btnSpinner = btn.querySelector(".btn-spinner");
 
         try {
-          // تعطيل الزرار وإظهار السبينر
           btn.disabled = true;
           btnText.style.display = "none";
           btnSpinner.style.display = "inline-block";
           alertBox.style.display = "none";
 
-          // إنشاء أو استرجاع Device ID
           let deviceId = localStorage.getItem("deviceId");
           if (!deviceId) {
             deviceId = crypto.randomUUID();
             localStorage.setItem("deviceId", deviceId);
           }
 
-          // جلب الـ IP
           const res = await fetch("https://api.ipify.org?format=json");
           const data = await res.json();
           const ip = data.ip;
 
-          // إرسال التصويت
-          const response = await fetch(
-            "https://script.google.com/macros/s/AKfycbyvPhgjlgmYlQb6yV1iHLjoqZvrr1ohO4Bl_Cu0tK2L91oXhEBLrW4Ggcosp4UUZs5keg/exec",
-            {
-              method: "POST",
-              mode: "cors",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ team, ip, deviceId }),
-            }
-          );
+          const response = await fetch(scriptURL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ team, ip, deviceId }),
+          });
 
           const result = await response.json();
 
-          // عرض الرسالة من السيرفر
           alertBox.innerText = result.message;
           alertBox.className = `alert ${
             result.success ? "alert-success" : "alert-danger"
@@ -187,7 +160,6 @@
           alertBox.style.display = "block";
 
           if (result.success) {
-            // حفظ الفريق اللي تم التصويت له في localStorage
             votedTeams.push(team);
             localStorage.setItem("votedTeams", JSON.stringify(votedTeams));
             btnText.innerText = "تم التصويت ✅";
