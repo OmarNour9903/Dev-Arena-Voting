@@ -46,91 +46,49 @@
     </div>
 
     <script>
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzAeGQxsPablwBOOcsKsmX9kChxDae5GnBTC2iWb_KOIDn0WhouAI-HC469rTn_TA_elQ/exec";
+async function vote(team) {
+  const button = document.getElementById(`vote-${team}`);
+  button.disabled = true;
+  const originalText = button.innerHTML;
+  button.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
 
-      const teams = [
-        { name: "Team 1", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 2", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 3", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 4", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 5", logo: "./1000541647-01.jpeg.jpg" },
-      ];
+  try {
+    // ✅ إنشاء أو استرجاع الـ Device ID
+    let deviceId = localStorage.getItem("deviceId");
+    if (!deviceId) {
+      deviceId = crypto.randomUUID();
+      localStorage.setItem("deviceId", deviceId);
+    }
 
-      const container = document.getElementById("teamsContainer");
-      const alertBox = document.getElementById("alertBox");
+    // ✅ الحصول على الـ IP
+    const ipResponse = await fetch("https://api.ipify.org?format=json");
+    const ipData = await ipResponse.json();
+    const ip = ipData.ip;
 
-      // توليد الكروت
-      teams.forEach(team => {
-        const card = document.createElement("div");
-        card.className = "col-md-4 col-sm-6";
-        card.innerHTML = `
-          <div class="team-card">
-            <img src="${team.logo}" alt="${team.name}" />
-            <div class="team-info">
-              <h5>${team.name}</h5>
-              <button class="btn btn-primary vote-btn" onclick="vote('${team.name}', this)">
-                <span class="btn-text">Vote</span>
-                <span class="btn-spinner"></span>
-              </button>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-
-      async function getIP() {
-        try {
-          const r = await fetch("https://api.ipify.org?format=json");
-          const j = await r.json();
-          return j.ip || "";
-        } catch {
-          return "";
-        }
+    // ✅ إرسال البيانات للسيرفر
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbyVasgC_3qDN0WLRMqAwRMZHvMxLJTyT7wPo1gBbaZHZ_sbECRYQ2nUYcDmO-heDTyNBA/exec",
+      {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ team, ip, deviceId }),
       }
+    );
 
-      async function vote(team, btn) {
-        const btnText = btn.querySelector(".btn-text");
-        const btnSpinner = btn.querySelector(".btn-spinner");
-        btn.disabled = true;
-        btnText.style.display = "none";
-        btnSpinner.style.display = "inline-block";
-        hideAlert();
+    // مافيش رد مباشر بسبب no-cors، فنعمل رسالة عامة للمستخدم
+    alert("✅ تم تسجيل صوتك بنجاح!");
 
-        try {
-          const ip = await getIP();
-          await fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ team, ip }),
-          });
-
-          btn.classList.remove("btn-primary");
-          btn.classList.add("btn-success");
-          btnText.textContent = "تم التصويت ✅";
-          btnSpinner.style.display = "none";
-          btnText.style.display = "inline";
-          showAlert("✅ تم تسجيل صوتك بنجاح!", "success");
-        } catch (err) {
-          console.error(err);
-          btn.disabled = false;
-          btnText.style.display = "inline";
-          btnSpinner.style.display = "none";
-          btnText.textContent = "Vote";
-          showAlert("⚠️ حصل خطأ أثناء إرسال التصويت!", "danger");
-        }
-      }
-
-      function showAlert(text, type = "success") {
-        alertBox.innerText = text;
-        alertBox.className = "alert alert-" + type;
-        alertBox.style.display = "block";
-        setTimeout(() => (alertBox.style.display = "none"), 4000);
-      }
-
-      function hideAlert() {
-        alertBox.style.display = "none";
-      }
-    </script>
+  } catch (err) {
+    console.error(err);
+    alert("⚠️ حصل خطأ، حاول تاني بعد شوية.");
+  } finally {
+    button.disabled = false;
+    button.innerHTML = originalText;
+  }
+}
+</script>
   </body>
 </html>
