@@ -166,11 +166,13 @@
 
           // إرسال التصويت
           const response = await fetch(
-            "https://script.google.com/macros/s/AKfycbwuEakMpu8ODaqrMrC3hEBMxcBcLdnfZGuMq3CvTJ1sLGmSGN8fLfQdxbJk2j5vYwENZA/exec",
+            "https://script.google.com/macros/s/AKfycbyvPhgjlgmYlQb6yV1iHLjoqZvrr1ohO4Bl_Cu0tK2L91oXhEBLrW4Ggcosp4UUZs5keg/exec",
             {
               method: "POST",
               mode: "cors",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+              },
               body: JSON.stringify({ team, ip, deviceId }),
             }
           );
