@@ -46,11 +46,9 @@
     </div>
 
     <script>
-      /* ====== عدل هنا: حط رابط الـ Web App (exec) اللي طلّعته من Apps Script ====== */
-      const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYED_EXEC_ID/exec";
-      /* ===================================================================== */
-
-      // proxy (allorigins) لتحويل الطلب وتفادي CORS preflight
+      /* ====== رابط Web App ====== */
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6dDtFkJlY7bMd-3o5MpFM3HDdOQuk5zJtFZlV5NhtP0aQLzoUKLuwpnWkwJSPhxa9gA/exec";
+      /* ====== استخدام Proxy لتفادي CORS ====== */
       const PROXY_PREFIX = "https://api.allorigins.win/raw?url=";
 
       const teams = [
@@ -59,13 +57,12 @@
         { name: "Team 3", logo: "./1000541647-01.jpeg.jpg" },
         { name: "Team 4", logo: "./1000541647-01.jpeg.jpg" },
         { name: "Team 5", logo: "./1000541647-01.jpeg.jpg" },
-        // كمل باقي التيمات للوصول إلى 22
       ];
 
       const container = document.getElementById("teamsContainer");
       const alertBox = document.getElementById("alertBox");
 
-      // generate cards
+      // توليد الكروت
       teams.forEach(team => {
         const card = document.createElement("div");
         card.className = "col-md-4 col-sm-6";
@@ -91,16 +88,15 @@
           return j.ip || "";
         } catch (e) {
           console.warn("IP fetch failed:", e);
-          return ""; // لو فشل جまあ نرسل فارغ
+          return "";
         }
       }
 
-      // main vote function (using proxy to avoid CORS issues)
+      // دالة التصويت
       async function vote(team, btn) {
         const btnText = btn.querySelector(".btn-text");
         const btnSpinner = btn.querySelector(".btn-spinner");
 
-        // show spinner
         btn.disabled = true;
         btnText.style.display = "none";
         btnSpinner.style.display = "inline-block";
@@ -108,57 +104,44 @@
 
         try {
           const ip = await getIP();
-          // send via proxy to avoid CORS/preflight blocking
-          const url = PROXY_PREFIX + encodeURIComponent("https://script.google.com/macros/s/AKfycbzIB1immaW-T_LwYhc267NyGHwZezu_ijNr0spNH2MKcNMlof3Qz60wAtK0-LFEwjuW-A/exec");
+          const url = PROXY_PREFIX + encodeURIComponent(SCRIPT_URL);
           const res = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ team, ip })
           });
 
-          // allorigins returns the proxied resource body directly (raw)
-          // but some proxies may wrap; we handle both JSON and plain text
           const text = await res.text();
           let result;
-          try { result = JSON.parse(text); } catch (e) { result = { success: false, message: text }; }
+          try { result = JSON.parse(text); } catch { result = { success: false, message: text }; }
 
-          if (result && result.success) {
-            // success: lock button and show success state
+          if (result.success) {
             btn.classList.remove("btn-primary");
             btn.classList.add("btn-success");
             btnText.textContent = "تم التصويت ✅";
             showAlert(result.message || "✅ تم تسجيل صوتك بنجاح!", "success");
-            // keep button disabled (user can't vote same team again)
-            btn.disabled = true;
           } else {
-            // server says already voted or other message
-            const msg = (result && result.message) ? result.message : "حدث خطأ في التصويت";
-            if (msg.includes("صوتت") || msg.toLowerCase().includes("already")) {
+            const msg = result.message || "⚠️ حصل خطأ في التصويت.";
+            if (msg.includes("قبل كده")) {
               btn.classList.remove("btn-primary");
               btn.classList.add("btn-warning");
               btnText.textContent = "صوتت قبل كده ⚠️";
-              btn.disabled = true;
             } else {
-              // general failure: revert button and show error
-              btn.disabled = false;
               btnText.textContent = "Vote";
-              showAlert(msg, "danger");
+              btn.disabled = false;
             }
-            showAlert(msg, result && result.success ? "success" : "warning");
+            showAlert(msg, "warning");
           }
+
         } catch (err) {
           console.error(err);
-          // network/proxy error: revert UI
+          btnText.textContent = "Vote";
           btn.disabled = false;
-          btnText.style.display = "inline";
-          btnSpinner.style.display = "none";
           showAlert("⚠️ حصل خطأ أثناء إرسال التصويت. حاول تاني.", "danger");
-          return;
+        } finally {
+          btnSpinner.style.display = "none";
+          btnText.style.display = "inline";
         }
-
-        // finish: hide spinner but keep final btn text
-        btnSpinner.style.display = "none";
-        btnText.style.display = "inline";
       }
 
       function showAlert(text, type = "success") {
@@ -167,6 +150,7 @@
         alertBox.style.display = "block";
         setTimeout(() => (alertBox.style.display = "none"), 4000);
       }
+
       function hideAlert() {
         alertBox.style.display = "none";
       }
