@@ -41,18 +41,29 @@
         margin-top: 10px;
         width: 100%;
         border-radius: 10px;
+        position: relative;
       }
       .alert {
         text-align: center;
         margin-top: 20px;
         display: none;
       }
-
-      /* سبينر التحميل */
-      .spinner-border {
+      /* السبينر الصغير داخل الزرار */
+      .btn-spinner {
         display: none;
-        margin: 0 auto;
-        color: #0d6efd;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid #fff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        margin: auto;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -66,11 +77,6 @@
 
       <div id="alertBox" class="alert alert-success">
         ✅ تم تسجيل صوتك بنجاح!
-      </div>
-
-      <!-- سبينر التحميل -->
-      <div id="spinner" class="spinner-border" role="status">
-        <span class="visually-hidden">Loading...</span>
       </div>
     </div>
 
@@ -103,7 +109,10 @@
             <img src="${team.logo}" alt="${team.name}" />
             <div class="team-info">
               <h5>${team.name}</h5>
-              <button class="btn btn-primary vote-btn" onclick="vote('${team.name}', this)">Vote</button>
+              <button class="btn btn-primary vote-btn" onclick="vote('${team.name}', this)">
+                <span class="btn-text">Vote</span>
+                <span class="btn-spinner"></span>
+              </button>
             </div>
           </div>
         `;
@@ -128,12 +137,14 @@
       */
       async function vote(team, btn) {
         const alertBox = document.getElementById("alertBox");
-        const spinner = document.getElementById("spinner");
+        const btnText = btn.querySelector(".btn-text");
+        const btnSpinner = btn.querySelector(".btn-spinner");
 
         try {
           // عطّل الزرار وأظهر السبينر
           btn.disabled = true;
-          spinner.style.display = "inline-block";
+          btnText.style.display = "none";
+          btnSpinner.style.display = "inline-block";
           alertBox.style.display = "none";
 
           const ip = await getIP();
@@ -148,7 +159,6 @@
             }
           );
 
-          // بعد ما يخلص
           alertBox.innerText = "✅ تم تسجيل صوتك!";
           alertBox.className = "alert alert-success";
           alertBox.style.display = "block";
@@ -158,10 +168,10 @@
           alertBox.style.display = "block";
           console.error(error);
         } finally {
-          // رجّع الحالة الطبيعية
-          spinner.style.display = "none";
+          // رجّع الزرار لحالته
           btn.disabled = false;
-
+          btnText.style.display = "inline";
+          btnSpinner.style.display = "none";
           setTimeout(() => (alertBox.style.display = "none"), 3000);
         }
       }
