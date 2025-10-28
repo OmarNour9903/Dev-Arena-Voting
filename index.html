@@ -81,100 +81,108 @@
     </div>
 
     <script>
-      /*
-        ===========================
-              إعداد التيمات
-        ===========================
-      */
-      const teams = [
-        { name: "Team 1", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 2", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 3", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 4", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 5", logo: "./1000541647-01.jpeg.jpg" },
-      ];
+  /*
+    ===========================
+          إعداد التيمات
+    ===========================
+  */
+  const teams = [
+    { name: "Team 1", logo: "./1000541647-01.jpeg.jpg" },
+    { name: "Team 2", logo: "./1000541647-01.jpeg.jpg" },
+    { name: "Team 3", logo: "./1000541647-01.jpeg.jpg" },
+    { name: "Team 4", logo: "./1000541647-01.jpeg.jpg" },
+    { name: "Team 5", logo: "./1000541647-01.jpeg.jpg" },
+  ];
 
-      const container = document.getElementById("teamsContainer");
+  const container = document.getElementById("teamsContainer");
 
-      /*
-        ===========================
-              توليد الكروت
-        ===========================
-      */
-      teams.forEach((team) => {
-        const card = document.createElement("div");
-        card.className = "col-md-4 col-sm-6";
-        card.innerHTML = `
-          <div class="team-card">
-            <img src="${team.logo}" alt="${team.name}" />
-            <div class="team-info">
-              <h5>${team.name}</h5>
-              <button class="btn btn-primary vote-btn" onclick="vote('${team.name}', this)">
-                <span class="btn-text">Vote</span>
-                <span class="btn-spinner"></span>
-              </button>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
+  /*
+    ===========================
+          توليد الكروت
+    ===========================
+  */
+  teams.forEach((team) => {
+    const card = document.createElement("div");
+    card.className = "col-md-4 col-sm-6";
+    card.innerHTML = `
+      <div class="team-card">
+        <img src="${team.logo}" alt="${team.name}" />
+        <div class="team-info">
+          <h5>${team.name}</h5>
+          <button class="btn btn-primary vote-btn" onclick="vote('${team.name}', this)">
+            <span class="btn-text">Vote</span>
+            <span class="btn-spinner"></span>
+          </button>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
 
-      /*
-        ===========================
-              دالة جلب الـ IP
-        ===========================
-      */
-      async function getIP() {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        return data.ip;
-      }
+  /*
+    ===========================
+          دالة جلب الـ IP
+    ===========================
+  */
+  async function getIP() {
+    const res = await fetch("https://api.ipify.org?format=json");
+    const data = await res.json();
+    return data.ip;
+  }
 
-      /*
-        ===========================
-              دالة التصويت
-        ===========================
-      */
-      async function vote(team, btn) {
-        const alertBox = document.getElementById("alertBox");
-        const btnText = btn.querySelector(".btn-text");
-        const btnSpinner = btn.querySelector(".btn-spinner");
+  /*
+    ===========================
+          دالة التصويت
+    ===========================
+  */
+  async function vote(team, btn) {
+    const alertBox = document.getElementById("alertBox");
+    const btnText = btn.querySelector(".btn-text");
+    const btnSpinner = btn.querySelector(".btn-spinner");
 
-        try {
-          // عطّل الزرار وأظهر السبينر
-          btn.disabled = true;
-          btnText.style.display = "none";
-          btnSpinner.style.display = "inline-block";
-          alertBox.style.display = "none";
+    try {
+      // عطّل الزرار وأظهر السبينر
+      btn.disabled = true;
+      btnText.style.display = "none";
+      btnSpinner.style.display = "inline-block";
+      alertBox.style.display = "none";
 
-          const ip = await getIP();
+      const ip = await getIP();
 
-          await fetch(
-            "https://script.google.com/macros/s/AKfycbyQy_dAkGAXu1oOwgS8RQr_HlRTAD-HoBqZi5BjDez7l6sMCDAvt1C-Yp3VXHW6iVSVNQ/exec",
-            {
-              method: "POST",
-              mode: "no-cors",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ team, ip }),
-            }
-          );
-
-          alertBox.innerText = "✅ تم تسجيل صوتك!";
-          alertBox.className = "alert alert-success";
-          alertBox.style.display = "block";
-        } catch (error) {
-          alertBox.innerText = "⚠️ حصل خطأ أثناء إرسال التصويت!";
-          alertBox.className = "alert alert-danger";
-          alertBox.style.display = "block";
-          console.error(error);
-        } finally {
-          // رجّع الزرار لحالته
-          btn.disabled = false;
-          btnText.style.display = "inline";
-          btnSpinner.style.display = "none";
-          setTimeout(() => (alertBox.style.display = "none"), 3000);
+      const res = await fetch(
+        "https://script.google.com/macros/s/AKfycbxEqeW1gedeMwrrtaRA2DED2xk44m-VmpDxreFGI8S9rQaFziE-oc1g9aV4HQ3qQ-Hbgg/exec",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ team, ip }),
         }
+      );
+
+      const result = await res.json();
+
+      if (result.success) {
+        alertBox.innerText = result.message;
+        alertBox.className = "alert alert-success";
+      } else {
+        alertBox.innerText = result.message;
+        alertBox.className = "alert alert-warning";
       }
-    </script>
+
+      alertBox.style.display = "block";
+    } catch (error) {
+      alertBox.innerText = "⚠️ حصل خطأ أثناء إرسال التصويت!";
+      alertBox.className = "alert alert-danger";
+      alertBox.style.display = "block";
+      console.error(error);
+    } finally {
+      // رجّع الزرار لحالته
+      btn.disabled = false;
+      btnText.style.display = "inline";
+      btnSpinner.style.display = "none";
+      setTimeout(() => (alertBox.style.display = "none"), 3000);
+    }
+  }
+</script>
+
   </body>
 </html>
