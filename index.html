@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Dev Arena Voting</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <style>
       body {
         background-color: #0f172a;
@@ -15,49 +12,26 @@
         font-family: "Poppins", sans-serif;
         padding: 40px 0;
       }
-      .container {
-        max-width: 1200px;
-      }
+      .container { max-width: 1200px; }
       .team-card {
         background-color: #1e293b;
         border-radius: 15px;
         overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        transition: transform 0.2s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        transition: transform .2s ease;
       }
-      .team-card:hover {
-        transform: translateY(-5px);
-      }
-      .team-card img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-      }
-      .team-info {
-        padding: 15px;
-        text-align: center;
-      }
-      .vote-btn {
-        margin-top: 10px;
-        width: 100%;
-        border-radius: 10px;
-        position: relative;
-      }
+      .team-card:hover { transform: translateY(-5px); }
+      .team-card img { width:100%; height:180px; object-fit:cover; }
+      .team-info { padding:15px; text-align:center; }
+      .vote-btn { margin-top:10px; width:100%; border-radius:10px; position:relative; transition:all .2s ease; }
       .btn-spinner {
-        display: none;
-        width: 1rem;
-        height: 1rem;
-        border: 2px solid #fff;
-        border-top-color: transparent;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-        margin: auto;
+        display:none;
+        width:1rem; height:1rem;
+        border:2px solid #fff; border-top-color:transparent;
+        border-radius:50%; animation:spin .7s linear infinite; margin:auto;
       }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .alert { text-align:center; margin-top:20px; display:none; }
     </style>
   </head>
 
@@ -67,20 +41,32 @@
       <p class="mb-5">اختار التيم اللي عجبك وصوّت له ❤️</p>
 
       <div class="row g-4" id="teamsContainer"></div>
+
+      <div id="alertBox" class="alert" role="alert"></div>
     </div>
 
     <script>
+      /* ====== عدل هنا: حط رابط الـ Web App (exec) اللي طلّعته من Apps Script ====== */
+      const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYED_EXEC_ID/exec";
+      /* ===================================================================== */
+
+      // proxy (allorigins) لتحويل الطلب وتفادي CORS preflight
+      const PROXY_PREFIX = "https://api.allorigins.win/raw?url=";
+
       const teams = [
         { name: "Team 1", logo: "./1000541647-01.jpeg.jpg" },
         { name: "Team 2", logo: "./1000541647-01.jpeg.jpg" },
         { name: "Team 3", logo: "./1000541647-01.jpeg.jpg" },
         { name: "Team 4", logo: "./1000541647-01.jpeg.jpg" },
         { name: "Team 5", logo: "./1000541647-01.jpeg.jpg" },
+        // كمل باقي التيمات للوصول إلى 22
       ];
 
       const container = document.getElementById("teamsContainer");
+      const alertBox = document.getElementById("alertBox");
 
-      teams.forEach((team) => {
+      // generate cards
+      teams.forEach(team => {
         const card = document.createElement("div");
         card.className = "col-md-4 col-sm-6";
         card.innerHTML = `
@@ -99,54 +85,90 @@
       });
 
       async function getIP() {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        return data.ip;
+        try {
+          const r = await fetch("https://api.ipify.org?format=json");
+          const j = await r.json();
+          return j.ip || "";
+        } catch (e) {
+          console.warn("IP fetch failed:", e);
+          return ""; // لو فشل جまあ نرسل فارغ
+        }
       }
 
+      // main vote function (using proxy to avoid CORS issues)
       async function vote(team, btn) {
         const btnText = btn.querySelector(".btn-text");
         const btnSpinner = btn.querySelector(".btn-spinner");
 
+        // show spinner
         btn.disabled = true;
         btnText.style.display = "none";
         btnSpinner.style.display = "inline-block";
+        hideAlert();
 
         try {
           const ip = await getIP();
-          const response = await fetch(
-            "https://script.google.com/macros/s/AKfycbyRa4jqrLxMZct0VMWjA367XOZ1qLsdwwA73DDRpI9LtlBqO7oIx4peyXWRN_9b7AzNSw/exec",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ team, ip }),
-            }
-          );
+          // send via proxy to avoid CORS/preflight blocking
+          const url = PROXY_PREFIX + encodeURIComponent("https://script.google.com/macros/s/AKfycbzIB1immaW-T_LwYhc267NyGHwZezu_ijNr0spNH2MKcNMlof3Qz60wAtK0-LFEwjuW-A/exec");
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ team, ip })
+          });
 
-          if (!response.ok) throw new Error("Network error");
+          // allorigins returns the proxied resource body directly (raw)
+          // but some proxies may wrap; we handle both JSON and plain text
+          const text = await res.text();
+          let result;
+          try { result = JSON.parse(text); } catch (e) { result = { success: false, message: text }; }
 
-          const result = await response.json();
-
-          if (result.success) {
+          if (result && result.success) {
+            // success: lock button and show success state
             btn.classList.remove("btn-primary");
             btn.classList.add("btn-success");
             btnText.textContent = "تم التصويت ✅";
+            showAlert(result.message || "✅ تم تسجيل صوتك بنجاح!", "success");
+            // keep button disabled (user can't vote same team again)
+            btn.disabled = true;
           } else {
-            throw new Error(result.message || "حدث خطأ");
+            // server says already voted or other message
+            const msg = (result && result.message) ? result.message : "حدث خطأ في التصويت";
+            if (msg.includes("صوتت") || msg.toLowerCase().includes("already")) {
+              btn.classList.remove("btn-primary");
+              btn.classList.add("btn-warning");
+              btnText.textContent = "صوتت قبل كده ⚠️";
+              btn.disabled = true;
+            } else {
+              // general failure: revert button and show error
+              btn.disabled = false;
+              btnText.textContent = "Vote";
+              showAlert(msg, "danger");
+            }
+            showAlert(msg, result && result.success ? "success" : "warning");
           }
-        } catch (error) {
+        } catch (err) {
+          console.error(err);
+          // network/proxy error: revert UI
           btn.disabled = false;
-          btnText.textContent = "Vote";
           btnText.style.display = "inline";
           btnSpinner.style.display = "none";
-          alert("⚠️ حصل خطأ أثناء إرسال التصويت!");
-          console.error(error);
+          showAlert("⚠️ حصل خطأ أثناء إرسال التصويت. حاول تاني.", "danger");
           return;
         }
 
-        // بعد ما يوصل التصويت تمام
+        // finish: hide spinner but keep final btn text
         btnSpinner.style.display = "none";
         btnText.style.display = "inline";
+      }
+
+      function showAlert(text, type = "success") {
+        alertBox.innerText = text;
+        alertBox.className = "alert alert-" + (type === "danger" ? "danger" : (type === "warning" ? "warning" : "success"));
+        alertBox.style.display = "block";
+        setTimeout(() => (alertBox.style.display = "none"), 4000);
+      }
+      function hideAlert() {
+        alertBox.style.display = "none";
       }
     </script>
   </body>
