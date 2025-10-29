@@ -436,7 +436,7 @@
         ===============================
       */
       function handleVote(teamId, action) {
-        voteStates[teamId] = action === "vote" ? "voted" : "none";
+        voteStates[teamId] = action === "vote" ? "1" : "0";
         updateButtonStates(teamId);
       }
 
