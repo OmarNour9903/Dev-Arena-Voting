@@ -123,6 +123,32 @@
       height: 16px !important;
       margin-left: 5px;
     }
+    .submit-container {
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .submit-btn {
+      padding: 15px 50px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     .alert-box {
       position: fixed;
       top: 20px;
@@ -218,6 +244,12 @@
 
   <div class="teams-grid" id="teamsContainer"></div>
 
+  <div class="submit-container">
+    <button id="submitBtn" class="submit-btn">
+      <span id="submitBtnText">إرسال التصويت</span>
+    </button>
+  </div>
+
   <div id="alertBox" class="alert-box"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -283,48 +315,53 @@
       }
     }
 
-    async function handleVote(teamId, action) {
-      const team = teams.find(t => t.id === teamId);
-      const voteBtn = document.querySelector(`[data-team-id="${teamId}"][data-action="${action}"]`);
-      const btnText = voteBtn.querySelector('.btn-text');
-      const originalText = btnText.textContent;
+    function handleVote(teamId, action) {
+      // تحديث الحالة محليًا فقط (بدون إرسال)
+      voteStates[teamId] = action === 'vote' ? 'voted' : 'none';
+      updateButtonStates(teamId);
+    }
 
-      // إظهار spinner
-      btnText.textContent = '';
+    async function handleSubmit() {
+      const submitBtn = document.getElementById('submitBtn');
+      const submitBtnText = document.getElementById('submitBtnText');
       const spinner = document.createElement('div');
       spinner.className = 'spinner-border spinner-border-sm text-light';
-      spinner.style.marginLeft = '5px';
-      voteBtn.appendChild(spinner);
-      voteBtn.disabled = true;
+      spinner.style.marginLeft = '10px';
+
+      // إظهار spinner
+      submitBtn.disabled = true;
+      submitBtnText.textContent = '';
+      submitBtn.appendChild(spinner);
 
       try {
         const formData = new FormData();
-        const value = action === 'vote' ? 'vote' : 'unvote';
-        formData.append(team.entryId, value);
+        
+        // جمع جميع التصويتات
+        teams.forEach(team => {
+          const state = voteStates[team.id];
+          if (state === 'voted') {
+            formData.append(team.entryId, 'vote');
+          }
+        });
 
-        const response = await fetch(FORM_URL, {
+        // إرسال جميع البيانات مرة واحدة
+        await fetch(FORM_URL, {
           method: 'POST',
           body: formData,
           mode: 'no-cors'
         });
 
-        // تحديث الحالة
-        voteStates[teamId] = action === 'vote' ? 'voted' : 'none';
-        updateButtonStates(teamId);
-
         // إزالة spinner وإظهار النص
         spinner.remove();
-        if (action === 'vote') {
-          btnText.textContent = '✅ تم التصويت';
-        } else {
-          btnText.textContent = 'صوّت';
-        }
+        submitBtnText.textContent = 'إرسال التصويت';
+        submitBtn.disabled = false;
 
-        showAlert(`✅ تم ${action === 'vote' ? 'التصويت' : 'إلغاء التصويت'} لـ ${team.name}`, 'success');
+        showAlert('✅ تم إرسال التصويت بنجاح!', 'success');
       } catch (error) {
         showAlert('❌ حدث خطأ في الإرسال', 'danger');
-        btnText.textContent = originalText;
         spinner.remove();
+        submitBtnText.textContent = 'إرسال التصويت';
+        submitBtn.disabled = false;
       }
     }
 
@@ -361,6 +398,9 @@
 
     // تحميل البيانات عند التحميل
     populateTeams();
+
+    // إضافة event listener لزر الإرسال
+    document.getElementById('submitBtn').addEventListener('click', handleSubmit);
   </script>
 </body>
 </html>
