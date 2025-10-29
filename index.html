@@ -248,7 +248,7 @@
   <body>
     <div class="header">
       <h1>🎯 Dev Arena Voting</h1>
-      <p class="subtitle">اختار التيمات اللي عجبوك وصوّت ❤️</p>
+      <p class="subtitle">اختار التيمات اللي عجبوك وصوّت ليه❤️</p>
     </div>
 
     <div class="teams-grid" id="teamsContainer"></div>
@@ -435,13 +435,13 @@
       }
 
       async function submitVote(entryId, value) {
-        return new Promise((resolve) => {
-          const img = new Image();
-          const params = new URLSearchParams();
-          params.append(entryId, value ? "1" : "0");
-          
-          img.onload = img.onerror = () => resolve();
-          img.src = `${FORM_URL}?${params.toString()}`;
+        const formData = new FormData();
+        formData.append(entryId, value ? "1" : "0");
+
+        return fetch(FORM_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body: formData,
         });
       }
 
@@ -463,7 +463,7 @@
             const value = state === "voted" ? "1" : "0";
             await submitVote(team.entryId, value);
             // تأخير صغير بين الطلبات لتجنب throttling
-            await new Promise(r => setTimeout(r, 50));
+            await new Promise((r) => setTimeout(r, 50));
           }
 
           spinner.remove();
