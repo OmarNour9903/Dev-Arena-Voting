@@ -302,7 +302,7 @@
         const value = action === 'vote' ? 'vote' : 'unvote';
         formData.append(team.entryId, value);
 
-        await fetch(FORM_URL, {
+        const response = await fetch(FORM_URL, {
           method: 'POST',
           body: formData,
           mode: 'no-cors'
@@ -312,10 +312,19 @@
         voteStates[teamId] = action === 'vote' ? 'voted' : 'none';
         updateButtonStates(teamId);
 
+        // إزالة spinner وإظهار النص
+        spinner.remove();
+        if (action === 'vote') {
+          btnText.textContent = '✅ تم التصويت';
+        } else {
+          btnText.textContent = 'صوّت';
+        }
+
         showAlert(`✅ تم ${action === 'vote' ? 'التصويت' : 'إلغاء التصويت'} لـ ${team.name}`, 'success');
       } catch (error) {
         showAlert('❌ حدث خطأ في الإرسال', 'danger');
         btnText.textContent = originalText;
+        spinner.remove();
       }
     }
 
