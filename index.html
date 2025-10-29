@@ -340,7 +340,7 @@
         teams.forEach(team => {
           const state = voteStates[team.id];
           if (state === 'voted') {
-            formData.append(team.entryId, 'vote');
+            formData.append(team.entryId, '1');
           }
         });
 
