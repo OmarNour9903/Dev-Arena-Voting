@@ -430,9 +430,19 @@
       }
 
       function handleVote(teamId, action) {
-        // تحديث الحالة محليًا فقط (بدون إرسال)
         voteStates[teamId] = action === "vote" ? "voted" : "none";
         updateButtonStates(teamId);
+      }
+
+      async function submitVote(entryId, value) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          const params = new URLSearchParams();
+          params.append(entryId, value ? "1" : "0");
+          
+          img.onload = img.onerror = () => resolve();
+          img.src = `${FORM_URL}?${params.toString()}`;
+        });
       }
 
       async function handleSubmit() {
@@ -442,27 +452,20 @@
         spinner.className = "spinner-border spinner-border-sm text-light";
         spinner.style.marginLeft = "10px";
 
-        // إظهار spinner
         submitBtn.disabled = true;
         submitBtnText.textContent = "";
         submitBtn.appendChild(spinner);
 
         try {
-          const formData = new FormData();
-
-          // جمع جميع التصويتات
-          teams.forEach((team) => {
+          // إرسال كل تصويت بشكل منفصل لضمان وصول الكل
+          for (const team of teams) {
             const state = voteStates[team.id];
-            formData.append(team.entryId, state === "voted" ? "1" : "0");
-          });
-          // إرسال جميع البيانات مرة واحدة
-          await fetch(FORM_URL, {
-            method: "POST",
-            body: formData,
-            mode: "no-cors",
-          });
+            const value = state === "voted" ? "1" : "0";
+            await submitVote(team.entryId, value);
+            // تأخير صغير بين الطلبات لتجنب throttling
+            await new Promise(r => setTimeout(r, 50));
+          }
 
-          // إزالة spinner وإظهار النص
           spinner.remove();
           submitBtnText.textContent = "إرسال التصويت";
           submitBtn.disabled = false;
@@ -511,10 +514,7 @@
           .join("");
       }
 
-      // تحميل البيانات عند التحميل
       populateTeams();
-
-      // إضافة event listener لزر الإرسال
       document
         .getElementById("submitBtn")
         .addEventListener("click", handleSubmit);
