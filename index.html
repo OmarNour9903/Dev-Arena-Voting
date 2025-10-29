@@ -1,171 +1,143 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dev Arena Voting</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <style>
       body {
-        background-color: #0f172a;
-        color: #fff;
+        background: #f7f8fa;
         font-family: "Poppins", sans-serif;
-        padding: 40px 0;
       }
-      .container {
-        max-width: 1200px;
-      }
-      .team-card {
-        background-color: #1e293b;
+      .vote-card {
+        background: #fff;
         border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        transition: transform 0.2s ease;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
       }
-      .team-card:hover {
+      .vote-card:hover {
         transform: translateY(-5px);
       }
-      .team-card img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-      }
-      .team-info {
-        padding: 15px;
-        text-align: center;
-      }
-      .vote-btn {
-        margin-top: 10px;
-        width: 100%;
+      .btn-vote {
+        background: #0066ff;
+        color: #fff;
+        border: none;
         border-radius: 10px;
-        position: relative;
-        transition: all 0.2s ease;
+        padding: 10px 25px;
+        font-weight: bold;
       }
-      .vote-btn.selected {
-        background-color: #10b981 !important;
-        border-color: #10b981 !important;
-      }
-      .alert {
-        text-align: center;
-        margin-top: 20px;
-        display: none;
+      .btn-vote:hover {
+        background: #004ecc;
       }
     </style>
   </head>
-
   <body>
-    <div class="container text-center">
-      <h1 class="mb-4 fw-bold">🎯 Dev Arena Voting</h1>
-      <p class="mb-5">اختار التيم أو التيمات اللي عجبوك وصوّت ❤️</p>
+    <div class="container py-5">
+      <h2 class="text-center mb-4">Vote for Your Favorite Team 🎯</h2>
 
-      <form id="voteForm">
-        <div class="row g-4" id="teamsContainer"></div>
-        <button
-          type="submit"
-          class="btn btn-success mt-4 px-5 fw-bold"
-          style="border-radius: 10px;"
-        >
-          إرسال التصويت
-        </button>
+      <form id="voteForm" class="d-flex flex-column align-items-center">
+        <div class="vote-card col-md-6">
+          <h5 class="mb-3">Select one or more teams:</h5>
+
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="entry.2006650567"
+              value="Team 1"
+            />
+            <label class="form-check-label">Team 1</label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="entry.2006650567"
+              value="Team 2"
+            />
+            <label class="form-check-label">Team 2</label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="entry.2006650567"
+              value="Team 3"
+            />
+            <label class="form-check-label">Team 3</label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="entry.2006650567"
+              value="Team 4"
+            />
+            <label class="form-check-label">Team 4</label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="entry.2006650567"
+              value="Team 5"
+            />
+            <label class="form-check-label">Team 5</label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="entry.2006650567"
+              value="Team 6"
+            />
+            <label class="form-check-label">Team 6</label>
+          </div>
+
+          <button type="submit" class="btn btn-vote mt-4">Submit Vote</button>
+        </div>
       </form>
 
-      <div id="alertBox" class="alert" role="alert"></div>
+      <p id="message" class="text-center mt-4 fw-bold"></p>
     </div>
 
     <script>
-      // 🔗 رابط Google Apps Script
-      const scriptURL =
-        "https://script.google.com/macros/s/AKfycbwquobLkZeeUd6XrCGCqCMPSyRJDusDCZSrZz0oJaFBOKanYP8XKk95jR3fYDnvkndkfA/exec";
+      const form = document.getElementById("voteForm");
+      const message = document.getElementById("message");
 
-      // 🧠 بيانات التيمات
-      const teams = [
-        { name: "Team 1", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 2", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 3", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 4", logo: "./1000541647-01.jpeg.jpg" },
-        { name: "Team 5", logo: "./1000541647-01.jpeg.jpg" },
-      ];
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-      const container = document.getElementById("teamsContainer");
-      const alertBox = document.getElementById("alertBox");
+        const formData = new FormData(form);
+        const scriptURL =
+          "https://script.google.com/macros/s/AKfycbzDWITm0oNue6aF2HvTkNeVuws8i3yaBaDqf6tSKKxZYBdhe3efHfeRW5Oj2-1b6msJMg/exec";
 
-      // إنشاء الكروت
-      teams.forEach((team, index) => {
-        const card = document.createElement("div");
-        card.className = "col-md-4 col-sm-6";
-        card.innerHTML = `
-          <div class="team-card">
-            <img src="${team.logo}" alt="${team.name}" />
-            <div class="team-info">
-              <h5>${team.name}</h5>
-              <input type="checkbox" name="team" value="${team.name}" id="team-${index}" hidden>
-              <button type="button" class="btn btn-primary vote-btn" onclick="toggleVote(${index})">
-                اختار
-              </button>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
+        try {
+          const response = await fetch(scriptURL, {
+            method: "POST",
+            body: formData,
+          });
 
-      // تغيير حالة الزرار لما المستخدم يختار
-      function toggleVote(index) {
-        const checkbox = document.getElementById(`team-${index}`);
-        const button = document.querySelectorAll(".vote-btn")[index];
-
-        checkbox.checked = !checkbox.checked;
-
-        if (checkbox.checked) {
-          button.classList.add("selected");
-          button.textContent = "تم الاختيار ✅";
-        } else {
-          button.classList.remove("selected");
-          button.textContent = "اختار";
+          const result = await response.json();
+          if (result.success) {
+            message.textContent = "✅ Vote submitted successfully!";
+            message.style.color = "green";
+            form.reset();
+          } else {
+            message.textContent = "⚠️ Something went wrong!";
+            message.style.color = "red";
+          }
+        } catch (error) {
+          console.error(error);
+          message.textContent = "❌ Error submitting vote.";
+          message.style.color = "red";
         }
-      }
-
-      // عند إرسال التصويت
-      document
-        .getElementById("voteForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          alertBox.style.display = "none";
-
-          const selected = Array.from(
-            document.querySelectorAll('input[name="team"]:checked')
-          ).map((el) => el.value);
-
-          if (selected.length === 0) {
-            alertBox.innerText = "⚠️ من فضلك اختار تيم واحد على الأقل.";
-            alertBox.className = "alert alert-warning";
-            alertBox.style.display = "block";
-            return;
-          }
-
-          try {
-            const res = await fetch(scriptURL, {
-              method: "POST",
-              body: new URLSearchParams({ team: selected.join(", ") }),
-            });
-
-            const data = await res.json();
-            alertBox.innerText = data.message || "تم إرسال التصويت ✅";
-            alertBox.className = "alert alert-success";
-            alertBox.style.display = "block";
-
-            // قفل الأزرار بعد التصويت
-            document.querySelectorAll(".vote-btn").forEach((btn) => {
-              btn.disabled = true;
-            });
-          } catch (err) {
-            alertBox.innerText = "❌ حصل خطأ أثناء الإرسال.";
-            alertBox.className = "alert alert-danger";
-            alertBox.style.display = "block";
-          }
-        });
+      });
     </script>
   </body>
 </html>
