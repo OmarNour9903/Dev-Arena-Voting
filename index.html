@@ -19,7 +19,7 @@
       padding: 40px 0;
     }
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
     }
     h1 {
       font-size: 2.5rem;
@@ -31,71 +31,63 @@
       color: #cbd5e1;
       margin-bottom: 40px;
     }
-    .table-container {
+    .team-card {
       background-color: #1e293b;
       border-radius: 15px;
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
-    table {
-      margin-bottom: 0;
-      color: #fff;
+    .team-card:hover {
+      transform: translateY(-5px);
     }
-    thead {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    .team-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
     }
-    th {
+    .team-info {
       padding: 20px;
-      font-weight: 600;
-      border: none;
-      font-size: 1rem;
-    }
-    tbody tr {
-      border-bottom: 1px solid #334155;
-      transition: all 0.3s ease;
-    }
-    tbody tr:hover {
-      background-color: #0f172a;
-    }
-    tbody tr:last-child {
-      border-bottom: none;
-    }
-    td {
-      padding: 20px;
-      vertical-align: middle;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
     }
     .team-name {
       font-weight: 600;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
     }
-    .radio-group {
+    .vote-options {
       display: flex;
-      gap: 15px;
-      align-items: center;
-      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 10px;
     }
-    .radio-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-    }
-    .radio-option input[type="radio"] {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-      accent-color: #10b981;
-    }
-    .radio-option label {
-      margin: 0;
+    .vote-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #334155;
+      background-color: transparent;
+      color: #fff;
       cursor: pointer;
       font-weight: 500;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
     }
-    .vote-label {
-      color: #10b981;
+    .vote-btn:hover {
+      border-color: #10b981;
     }
-    .no-vote-label {
-      color: #ef4444;
+    .vote-btn.selected {
+      background-color: #10b981 !important;
+      border-color: #10b981 !important;
+      color: #fff;
+    }
+    .vote-btn.no-vote.selected {
+      background-color: #ef4444 !important;
+      border-color: #ef4444 !important;
     }
     .submit-btn {
       width: 100%;
@@ -107,6 +99,8 @@
       margin-top: 30px;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       border: none;
+      color: #fff;
+      cursor: pointer;
     }
     .submit-btn:hover {
       transform: translateY(-2px);
@@ -138,24 +132,11 @@
     <p class="subtitle">اختار التيم أو التيمات اللي عجبوك وصوّت ❤️</p>
 
     <form id="voteForm">
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>التيم</th>
-              <th>التصويت</th>
-            </tr>
-          </thead>
-          <tbody id="teamsContainer">
-            <!-- سيتم ملء الصفوف هنا -->
-          </tbody>
-        </table>
+      <div class="row g-4" id="teamsContainer">
+        <!-- سيتم ملء الكروت هنا -->
       </div>
 
-      <button
-        type="submit"
-        class="btn submit-btn"
-      >
+      <button type="submit" class="btn submit-btn">
         إرسال التصويت
       </button>
     </form>
@@ -180,33 +161,51 @@
     function populateTeams() {
       const container = document.getElementById('teamsContainer');
       container.innerHTML = teams.map(team => `
-        <tr>
-          <td class="team-name">${team.name}</td>
-          <td>
-            <div class="radio-group">
-              <div class="radio-option">
-                <input 
-                  type="radio" 
-                  id="vote_${team.id}" 
-                  name="team_${team.id}" 
-                  value="vote"
-                  
-                />
-                <label for="vote_${team.id}" class="vote-label">✅ Vote</label>
-              </div>
-              <div class="radio-option">
-                <input 
-                  type="radio" 
-                  id="no_vote_${team.id}" 
-                  name="team_${team.id}" 
-                  value="no vote"
-                />
-                <label for="no_vote_${team.id}" class="no-vote-label">❌ No Vote</label>
+        <div class="col-md-6 col-lg-4">
+          <div class="team-card">
+            <div class="team-info">
+              <div class="team-name">${team.name}</div>
+              <div class="vote-options">
+                <button 
+                  type="button"
+                  class="vote-btn vote-option"
+                  data-team-id="${team.id}"
+                  data-value="vote"
+                  title="صوت"
+                >
+                  ✅ Vote
+                </button>
+                <button 
+                  type="button"
+                  class="vote-btn no-vote vote-option"
+                  data-team-id="${team.id}"
+                  data-value="no vote"
+                  title="لا"
+                >
+                  ❌ No Vote
+                </button>
               </div>
             </div>
-          </td>
-        </tr>
+          </div>
+        </div>
       `).join('');
+
+      // إضافة event listeners للأزرار
+      document.querySelectorAll('.vote-option').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const teamId = this.dataset.teamId;
+          const card = this.closest('.team-card');
+          
+          // إزالة selected من جميع أزرار نفس التيم
+          card.querySelectorAll('.vote-option').forEach(b => {
+            b.classList.remove('selected');
+          });
+          
+          // إضافة selected للزر المضغوط
+          this.classList.add('selected');
+        });
+      });
     }
 
     // التعامل مع الإرسال
@@ -218,21 +217,20 @@
       try {
         const formData = new FormData();
         
-        // أضف entry IDs صحيحة هنا (مثال)
-        // entry.123456789 = التيم الأول
-        // entry.987654321 = التيم الثاني
         const entryMap = {
-          1: 'entry.1935660066', // استبدل entry ID
+          1: 'entry.1935660066',
           2: 'entry.1118802292',
           3: 'entry.1368183074',
           4: 'entry.1263033947',
           5: 'entry.1790082750',
         };
         
-        teams.forEach(team => {
-          const selectedValue = document.querySelector(`input[name="team_${team.id}"]:checked`)?.value;
-          if (selectedValue && entryMap[team.id]) {
-            formData.append(entryMap[team.id], selectedValue);
+        // جمع البيانات من الأزرار المختارة
+        document.querySelectorAll('.vote-option.selected').forEach(btn => {
+          const teamId = parseInt(btn.dataset.teamId);
+          const value = btn.dataset.value;
+          if (entryMap[teamId]) {
+            formData.append(entryMap[teamId], value);
           }
         });
 
@@ -249,6 +247,9 @@
         setTimeout(() => {
           alertBox.style.display = 'none';
           document.getElementById('voteForm').reset();
+          document.querySelectorAll('.vote-option').forEach(btn => {
+            btn.classList.remove('selected');
+          });
         }, 3000);
 
       } catch (error) {
