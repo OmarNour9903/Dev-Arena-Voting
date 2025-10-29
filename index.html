@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dev Arena Voting</title>
+
+    <!-- Bootstrap + Icons + Fonts -->
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
       rel="stylesheet"
@@ -16,17 +18,30 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
     <style>
+      /*
+        ===============================
+        القواعد العامة للتنسيق
+        ===============================
+      */
       * {
         direction: rtl;
         text-align: right;
       }
+
       body {
         background-color: #0f172a;
         color: #fff;
         font-family: "Poppins", sans-serif;
         overflow-x: hidden;
       }
+
+      /*
+        ===============================
+        الهيدر
+        ===============================
+      */
       .header {
         padding: 30px 20px;
         text-align: center;
@@ -35,16 +50,24 @@
         align-items: center;
         justify-content: center;
       }
+
       h1 {
         font-size: 2.5rem;
         font-weight: 700;
         margin-bottom: 10px;
       }
+
       .subtitle {
         font-size: 1.1rem;
         color: #cbd5e1;
         margin-bottom: 30px;
       }
+
+      /*
+        ===============================
+        كروت الفرق
+        ===============================
+      */
       .teams-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -52,6 +75,7 @@
         padding: 30px 20px;
         max-width: 100%;
       }
+
       .team-card {
         background-color: #1e293b;
         border-radius: 12px;
@@ -62,16 +86,19 @@
         flex-direction: column;
         height: 100%;
       }
+
       .team-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
       }
+
       .team-image {
         width: 100%;
         height: 180px;
         object-fit: cover;
         background-color: #0f172a;
       }
+
       .team-info {
         padding: 15px;
         flex-grow: 1;
@@ -79,6 +106,7 @@
         flex-direction: column;
         justify-content: space-between;
       }
+
       .team-name {
         font-weight: 600;
         font-size: 1rem;
@@ -86,10 +114,17 @@
         text-align: center;
         color: #fff;
       }
+
+      /*
+        ===============================
+        أزرار التصويت
+        ===============================
+      */
       .vote-buttons {
         display: flex;
         gap: 8px;
       }
+
       .vote-btn {
         flex: 1;
         padding: 10px 8px;
@@ -107,35 +142,48 @@
         align-items: center;
         justify-content: center;
       }
+
       .vote-btn:hover:not(:disabled) {
         border-color: #10b981;
         color: #10b981;
       }
+
       .vote-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
       }
+
       .vote-btn.active {
         background-color: #10b981;
         border-color: #10b981;
         color: #fff;
       }
+
       .vote-btn.active.no-vote {
         background-color: #ef4444;
         border-color: #ef4444;
       }
+
       .btn-text {
         display: inline;
       }
+
       .spinner-border {
         width: 16px !important;
         height: 16px !important;
         margin-left: 5px;
       }
+
+      /*
+        ===============================
+        زر الإرسال النهائي
+        ===============================
+      */
       .submit-container {
         padding: 30px 20px;
         text-align: center;
       }
+
       .submit-btn {
         padding: 15px 50px;
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -150,14 +198,22 @@
         align-items: center;
         gap: 10px;
       }
+
       .submit-btn:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
       }
+
       .submit-btn:disabled {
         opacity: 0.6;
         cursor: not-allowed;
       }
+
+      /*
+        ===============================
+        رسائل التنبيه
+        ===============================
+      */
       .alert-box {
         position: fixed;
         top: 20px;
@@ -169,17 +225,21 @@
         animation: slideIn 0.3s ease;
         max-width: 300px;
       }
+
       .alert-box.show {
         display: block;
       }
+
       .alert-success {
         background-color: #10b981;
         color: #fff;
       }
+
       .alert-danger {
         background-color: #ef4444;
         color: #fff;
       }
+
       @keyframes slideIn {
         from {
           opacity: 0;
@@ -191,211 +251,147 @@
         }
       }
 
-      /* Mobile */
+      /*
+        ===============================
+        Responsive Design
+        ===============================
+      */
       @media (max-width: 1200px) {
         .teams-grid {
           grid-template-columns: repeat(4, 1fr);
         }
       }
+
       @media (max-width: 992px) {
         .teams-grid {
           grid-template-columns: repeat(3, 1fr);
         }
       }
+
       @media (max-width: 768px) {
         .teams-grid {
           grid-template-columns: repeat(2, 1fr);
           gap: 15px;
           padding: 15px 10px;
         }
+
         .team-card {
           flex-direction: row;
         }
+
         .team-image {
           width: 120px;
           height: 120px;
           flex-shrink: 0;
         }
+
         .team-info {
           padding: 12px;
         }
+
         .team-name {
           font-size: 0.9rem;
           margin-bottom: 10px;
         }
+
         .vote-buttons {
           gap: 6px;
         }
+
         .vote-btn {
           font-size: 0.75rem;
           padding: 8px 6px;
           min-height: 36px;
         }
       }
+
       @media (max-width: 480px) {
         .teams-grid {
           grid-template-columns: 1fr;
         }
+
         h1 {
           font-size: 1.8rem;
         }
+
         .subtitle {
           font-size: 0.95rem;
         }
       }
     </style>
   </head>
+
   <body>
+    <!-- ===============================
+         العنوان الرئيسي
+    =============================== -->
     <div class="header">
       <h1>🎯 Dev Arena Voting</h1>
-      <p class="subtitle">اختار التيمات اللي عجبوك وصوّت ليه❤️</p>
+      <p class="subtitle">اختار التيمات اللي عجبوك وصوّت ❤️</p>
     </div>
 
+    <!-- ===============================
+         كروت الفرق
+    =============================== -->
     <div class="teams-grid" id="teamsContainer"></div>
 
+    <!-- ===============================
+         زر الإرسال النهائي
+    =============================== -->
     <div class="submit-container">
       <button id="submitBtn" class="submit-btn">
         <span id="submitBtnText">إرسال التصويت</span>
       </button>
     </div>
 
+    <!-- ===============================
+         صندوق التنبيهات
+    =============================== -->
     <div id="alertBox" class="alert-box"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
     <script>
+      /*
+        ===============================
+        إعداد البيانات الأساسية
+        ===============================
+      */
       const FORM_URL =
         "https://docs.google.com/forms/d/e/1FAIpQLScLHgKYZf7JQ5zHhfHcdiquISkGZSh-mzE7lOwtEplS0uBRGg/formResponse";
 
-      // البيانات - 20 فريق
       const teams = [
-        {
-          id: 1,
-          name: "Team Alpha",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1935660066",
-        },
-        {
-          id: 2,
-          name: "Team Beta",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1118802292",
-        },
-        {
-          id: 3,
-          name: "Team Gamma",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1368183074",
-        },
-        {
-          id: 4,
-          name: "Team Delta",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1263033947",
-        },
-        {
-          id: 5,
-          name: "Team Epsilon",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1790082750",
-        },
-        {
-          id: 6,
-          name: "Team Zeta",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1935660067",
-        },
-        {
-          id: 7,
-          name: "Team Eta",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1118802293",
-        },
-        {
-          id: 8,
-          name: "Team Theta",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1368183075",
-        },
-        {
-          id: 9,
-          name: "Team Iota",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1263033948",
-        },
-        {
-          id: 10,
-          name: "Team Kappa",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1790082751",
-        },
-        {
-          id: 11,
-          name: "Team Lambda",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1935660068",
-        },
-        {
-          id: 12,
-          name: "Team Mu",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1118802294",
-        },
-        {
-          id: 13,
-          name: "Team Nu",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1368183076",
-        },
-        {
-          id: 14,
-          name: "Team Xi",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1263033949",
-        },
-        {
-          id: 15,
-          name: "Team Omicron",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1790082752",
-        },
-        {
-          id: 16,
-          name: "Team Pi",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1935660069",
-        },
-        {
-          id: 17,
-          name: "Team Rho",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1118802295",
-        },
-        {
-          id: 18,
-          name: "Team Sigma",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1368183077",
-        },
-        {
-          id: 19,
-          name: "Team Tau",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1263033950",
-        },
-        {
-          id: 20,
-          name: "Team Upsilon",
-          image: "./1000541647-01.jpeg.jpg",
-          entryId: "entry.1790082753",
-        },
+        { id: 1, name: "Team Alpha", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1935660066" },
+        { id: 2, name: "Team Beta", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1118802292" },
+        { id: 3, name: "Team Gamma", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1368183074" },
+        { id: 4, name: "Team Delta", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1263033947" },
+        { id: 5, name: "Team Epsilon", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1790082750" },
+        { id: 6, name: "Team Zeta", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1935660067" },
+        { id: 7, name: "Team Eta", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1118802293" },
+        { id: 8, name: "Team Theta", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1368183075" },
+        { id: 9, name: "Team Iota", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1263033948" },
+        { id: 10, name: "Team Kappa", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1790082751" },
+        { id: 11, name: "Team Lambda", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1935660068" },
+        { id: 12, name: "Team Mu", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1118802294" },
+        { id: 13, name: "Team Nu", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1368183076" },
+        { id: 14, name: "Team Xi", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1263033949" },
+        { id: 15, name: "Team Omicron", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1790082752" },
+        { id: 16, name: "Team Pi", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1935660069" },
+        { id: 17, name: "Team Rho", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1118802295" },
+        { id: 18, name: "Team Sigma", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1368183077" },
+        { id: 19, name: "Team Tau", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1263033950" },
+        { id: 20, name: "Team Upsilon", image: "./1000541647-01.jpeg.jpg", entryId: "entry.1790082753" },
       ];
 
-      // تخزين حالة التصويتات
+      // تخزين حالة كل تيم
       const voteStates = {};
-      teams.forEach((team) => {
-        voteStates[team.id] = "none"; // none, voted, unvoted
-      });
+      teams.forEach(team => (voteStates[team.id] = "none")); // none, voted
 
+      /*
+        ===============================
+        عرض رسالة تنبيه
+        ===============================
+      */
       function showAlert(message, type) {
         const alertBox = document.getElementById("alertBox");
         alertBox.textContent = message;
@@ -405,6 +401,11 @@
         }, 3000);
       }
 
+      /*
+        ===============================
+        تحديث حالة أزرار التصويت
+        ===============================
+      */
       function updateButtonStates(teamId) {
         const voteBtn = document.querySelector(
           `[data-team-id="${teamId}"][data-action="vote"]`
@@ -429,25 +430,25 @@
         }
       }
 
+      /*
+        ===============================
+        التعامل مع ضغط أزرار التصويت
+        ===============================
+      */
       function handleVote(teamId, action) {
         voteStates[teamId] = action === "vote" ? "voted" : "none";
         updateButtonStates(teamId);
       }
 
-      async function submitVote(entryId, value) {
-        const formData = new FormData();
-        formData.append(entryId, value ? "1" : "0");
-
-        return fetch(FORM_URL, {
-          method: "POST",
-          mode: "no-cors",
-          body: formData,
-        });
-      }
-
+      /*
+        ===============================
+        إرسال كل التصويتات للفورم
+        ===============================
+      */
       async function handleSubmit() {
         const submitBtn = document.getElementById("submitBtn");
         const submitBtnText = document.getElementById("submitBtnText");
+
         const spinner = document.createElement("div");
         spinner.className = "spinner-border spinner-border-sm text-light";
         spinner.style.marginLeft = "10px";
@@ -457,67 +458,66 @@
         submitBtn.appendChild(spinner);
 
         try {
-          // إرسال كل تصويت بشكل منفصل لضمان وصول الكل
-          for (const team of teams) {
-            const state = voteStates[team.id];
-            const value = state === "voted" ? "1" : "0";
-            await submitVote(team.entryId, value);
-            // تأخير صغير بين الطلبات لتجنب throttling
-            await new Promise((r) => setTimeout(r, 50));
-          }
+          const formData = new FormData();
+          teams.forEach(team => {
+            if (voteStates[team.id] === "voted") {
+              formData.append(team.entryId, "1");
+            }
+          });
+
+          await fetch(FORM_URL, { method: "POST", body: formData, mode: "no-cors" });
 
           spinner.remove();
           submitBtnText.textContent = "إرسال التصويت";
           submitBtn.disabled = false;
-
           showAlert("✅ تم إرسال التصويت بنجاح!", "success");
         } catch (error) {
-          showAlert("❌ حدث خطأ في الإرسال", "danger");
+          showAlert("❌ حدث خطأ أثناء الإرسال", "danger");
           spinner.remove();
           submitBtnText.textContent = "إرسال التصويت";
           submitBtn.disabled = false;
         }
       }
 
+      /*
+        ===============================
+        إنشاء كروت الفرق
+        ===============================
+      */
       function populateTeams() {
         const container = document.getElementById("teamsContainer");
         container.innerHTML = teams
           .map(
-            (team) => `
-        <div class="team-card">
-          <img src="${team.image}" alt="${team.name}" class="team-image" />
-          <div class="team-info">
-            <div class="team-name">${team.name}</div>
-            <div class="vote-buttons">
-              <button 
-                class="vote-btn"
-                data-team-id="${team.id}"
-                data-action="vote"
-                onclick="handleVote(${team.id}, 'vote')"
-              >
-                <span class="btn-text">صوّت</span>
-              </button>
-              <button 
-                class="vote-btn no-vote"
-                data-team-id="${team.id}"
-                data-action="unvote"
-                disabled
-                onclick="handleVote(${team.id}, 'unvote')"
-              >
-                <span class="btn-text">إلغاء</span>
-              </button>
+            team => `
+          <div class="team-card">
+            <img src="${team.image}" alt="${team.name}" class="team-image" />
+            <div class="team-info">
+              <div class="team-name">${team.name}</div>
+              <div class="vote-buttons">
+                <button class="vote-btn"
+                        data-team-id="${team.id}"
+                        data-action="vote"
+                        onclick="handleVote(${team.id}, 'vote')">
+                  <span class="btn-text">صوّت</span>
+                </button>
+                <button class="vote-btn no-vote"
+                        data-team-id="${team.id}"
+                        data-action="unvote"
+                        disabled
+                        onclick="handleVote(${team.id}, 'unvote')">
+                  <span class="btn-text">إلغاء</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      `
+        `
           )
           .join("");
       }
 
+      // تحميل الكروت + تفعيل زر الإرسال
       populateTeams();
-      document
-        .getElementById("submitBtn")
-        .addEventListener("click", handleSubmit);
+      document.getElementById("submitBtn").addEventListener("click", handleSubmit);
     </script>
   </body>
 </html>
